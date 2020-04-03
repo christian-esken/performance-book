@@ -1,10 +1,9 @@
-package org.cesken.perfbook.chapter1;
+package org.cesken.perfbook.chapter.sli;
 
-import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.jmx.JmxMeterRegistry;
+import org.cesken.perfbook.metrics.MetricsFactory;
+import org.cesken.perfbook.metrics.MetricsFactory.PublisherType;
 import org.cesken.perfbook.model.AccountInfoResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +19,7 @@ public class AccountInfoApplication {
 
     @PostConstruct
     void constrcut() {
-        MeterRegistry meterRegistry = pickMeterRegistry();
+        MeterRegistry meterRegistry = MetricsFactory.create(PublisherType.JMX);
         accountinfoRequestCounter = meterRegistry.counter("accountinfo.requests");
         accountinfoFailCounter = meterRegistry.counter("accountinfo.failed");
     }
@@ -34,13 +33,5 @@ public class AccountInfoApplication {
             accountinfoFailCounter.increment();
             throw exc;
         }
-    }
-
-    private MeterRegistry pickMeterRegistry() {
-        //return new SimpleMeterRegistry();
-        return new JmxMeterRegistry(new JmxConfig() {
-            @Override
-            public String get(String s) {  return null; }
-        }, Clock.SYSTEM);
     }
 }
